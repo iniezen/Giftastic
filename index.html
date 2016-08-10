@@ -1,0 +1,208 @@
+<html>
+<head>
+	<title>GifTastic</title>
+
+<!-- These are the quick styling guidelines -->
+<!-- =============================================================== -->
+
+	<style type="text/css">
+	div, input {
+			margin: 10px;
+			display: inline-block;
+
+		}
+	</style>
+
+	<style type="text/css">
+		
+	button, #addgif{
+
+		background-color: #255E69;
+		color: white;
+		margin: 3px;
+	}
+
+
+	</style>
+
+	<style type="text/css">
+		
+	form{
+
+	float:right;
+	display:block;
+	}
+
+
+	</style>
+
+
+
+</head>
+<body>
+
+<!-- this is the basic HTML Body -->
+<!-- ======================================================================== -->
+
+<div class="container">
+  <h1>Gif Search</h1>
+
+  <!-- Rendered Buttons will get Dumped Here  -->
+  <div id="buttonsView"></div>
+
+  <form id="gif-form">
+    <label for="gif-input">Add an animal</label>
+    <input type="text" id="gif-input"><br>
+    
+    <!-- Button triggers new gif to be added -->
+    <input id="addgif" type="submit" value="Add an animal">
+  </form>
+
+
+  <!-- gifs will Get Dumped Dere -->
+  <div id="gifsAppearHere"></div>
+
+  <!-- this is the Javascript Section -->
+<!-- ======================================================================== -->
+
+<script src='http://code.jquery.com/jquery-2.1.3.min.js'></script>
+<script type="text/javascript">
+
+	// Initial array of gifs
+	var gifs = ['Dog', 'Tiger', 'Llama', 'Lion'];
+
+	// ========================================================
+
+	// displaygifInfo function now re-renders the HTML to display the appropriate content. 
+	function displaygifInfo(){
+
+		$('#gifsAppearHere').empty();
+
+		var gif = $(this).attr('data-name');
+
+		var queryURL = "http://api.giphy.com/v1/gifs/search?q="+gif+"&limit=10&api_key=dc6zaTOxFJmzC";
+		
+		// Creates AJAX call for the specific gif being 
+		$.ajax({url: queryURL, method: 'GET'}).done(function(response) {
+
+                var results = response.data;
+
+
+                for (var i = 0; i < results.length; i++) {
+
+                    var animalDiv = $('<div>');
+
+                    var p = $('<p>').text("Rating: " + results[i].rating);
+
+                    var animalImage = $('<img>');
+                    animalImage.addClass('animalImage');
+                    animalImage.attr('src', results[i].images.fixed_height_small_still.url);
+                    animalImage.attr('data-still', results[i].images.fixed_height_small_still.url);
+                    animalImage.attr('data-animate', results[i].images.fixed_height_small.url);
+                    animalImage.attr('data-state', 'still');
+
+
+                    animalDiv.append(p);
+                    animalDiv.append(animalImage);
+
+                    $('#gifsAppearHere').prepend(animalDiv);
+                    //--------------------------------
+                }
+
+            });
+
+	}
+
+
+	// ========================================================
+
+	// Generic function for displaying gif data 
+	function renderButtons(){ 
+
+		// Deletes the gifs prior to adding new gifs (this is necessary otherwise you will have repeat buttons)
+		$('#buttonsView').empty();
+
+		// Loops through the array of gifs
+		for (var i = 0; i < gifs.length; i++){
+
+			// Then dynamicaly generates buttons for each gif in the array
+
+			// Note the jQUery syntax here... 
+		    var a = $('<button>') // This code $('<button>') is all jQuery needs to create the beginning and end tag. (<button></button>)
+		    a.addClass('gif'); // Added a class 
+		    a.attr('data-name', gifs[i]); // Added a data-attribute
+		    a.text(gifs[i]); // Provided the initial button text
+		    $('#buttonsView').append(a); // Added the button to the HTML
+		}
+	}
+
+	// ========================================================
+
+	// This function handles events where one button is clicked
+	$('#addgif').on('click', function(){
+
+		// This line of code will grab the input from the textbox
+		var gif = $('#gif-input').val().trim();
+
+		// The gif from the textbox is then added to our array
+		gifs.push(gif);
+		
+		// Our array then runs which handles the processing of our gif array
+		renderButtons();
+
+		// We have this line so that users can hit "enter" instead of clicking on ht button and it won't move to the next page
+		return false;
+	})
+
+	// ========================================================
+
+	// Generic function for displaying the gifInfo
+	$(document).on('click', '.gif', displaygifInfo);
+
+
+	// ========================================================
+
+	// This calls the renderButtons() function
+	renderButtons();
+
+// This section is used to toggle between still and animate images
+		// ========================================================
+
+
+
+		$(document).on("click", ".animalImage", function(){
+  		console.log(this);
+	
+
+	// $('.animalImage').on('click', function(){
+
+
+        var state = $(this).attr("data-state");
+        console.log(state);
+        // alert("test click function");
+
+
+
+        if(state==="still"){
+
+            $(this).attr('src', $(this).attr('data-animate'));
+            $(this).attr('data-state','animate');
+      
+         }   
+            else{
+                    $(this).attr('src', $(this).attr('data-still'));
+                    $(this).attr('data-state','still');
+
+            }
+
+
+
+	});
+
+
+</script>
+
+
+</body>
+</html>
+
